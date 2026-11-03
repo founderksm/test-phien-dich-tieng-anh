@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KSMLOOK Phiên dịch – Web app
 
-## Getting Started
+Ứng dụng tra cứu câu mẫu và thuật ngữ phiên dịch thương mại Việt – Anh – Trung. Dữ liệu gốc nằm ở `../translations/tong-hop-phien-dich-2026.md`, được nạp vào Postgres.
 
-First, run the development server:
+## Công nghệ
+
+Next.js 16 (App Router, TypeScript), Tailwind 4, Drizzle ORM, Postgres (Neon), Auth.js v5 (Google, giới hạn tên miền), PWA.
+
+## Chạy local
 
 ```bash
+cd web
+npm install
+cp .env.example .env.local   # điền AUTH_SECRET; đặt DEV_AUTH_BYPASS=1 để đăng nhập giả lập
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Khi không có `DATABASE_URL`, app dùng PGlite (Postgres nhúng) trong thư mục `.pglite/`, tự tạo bảng và nạp dữ liệu từ file markdown. Chế độ này **bị chặn ở production**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Kiểm tra
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run typecheck && npm run lint && npm test
+npm run e2e        # trình duyệt thật (Playwright cài sẵn trong môi trường), tự dựng server và dữ liệu tạm
+```
 
-## Learn More
+## Triển khai (Vercel + Neon)
 
-To learn more about Next.js, take a look at the following resources:
+1. Tạo database Neon (qua Vercel Marketplace) và lấy `DATABASE_URL`.
+2. Tạo Google OAuth Client (Web). Redirect URI: `https://<domain>/api/auth/callback/google`.
+3. Đặt biến môi trường trên Vercel: `DATABASE_URL`, `AUTH_SECRET` (`npx auth secret`), `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `ALLOWED_EMAIL_DOMAIN`, `ADMIN_EMAILS`. **Không** đặt `DEV_AUTH_BYPASS`.
+4. Đặt Root Directory của project Vercel là `web`.
+5. Chạy một lần từ máy có `DATABASE_URL`:
+   ```bash
+   npm run db:migrate
+   npm run db:seed     # chỉ nạp khi bảng còn trống, không ghi đè dữ liệu đã chỉnh sửa
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Phân quyền
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Mọi tài khoản thuộc `ALLOWED_EMAIL_DOMAIN` đăng nhập được và đề xuất câu (chờ duyệt).
+- Email trong `ADMIN_EMAILS` là admin: duyệt/từ chối, sửa câu, đăng câu mới ngay.
+- Mọi thao tác ghi đều được kiểm tra quyền phía server và lưu lịch sử vào `phrase_revisions`.

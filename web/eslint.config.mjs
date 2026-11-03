@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Script e2e độc lập (CommonJS, dùng Playwright cài sẵn trong môi trường).
+    "e2e/**",
   ]),
 ]);
 

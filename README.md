@@ -59,9 +59,14 @@ Repository này có thể dùng làm:
 ```text
 .
 ├── README.md
-└── translations/
-    └── tong-hop-phien-dich-2026.md
+├── translations/
+│   └── tong-hop-phien-dich-2026.md   # nguồn dữ liệu gốc
+└── web/                              # web app tra cứu (xem web/README.md)
 ```
+
+## Web app
+
+Thư mục [`web/`](web/README.md) chứa ứng dụng tra cứu câu mẫu và thuật ngữ (Next.js + Postgres), đăng nhập Google giới hạn tên miền công ty, có luồng đề xuất và duyệt câu mới.
 
 ## Nguyên tắc cập nhật
 
