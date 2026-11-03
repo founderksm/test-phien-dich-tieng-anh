@@ -142,7 +142,11 @@ export function parseArchive(markdown: string): ParsedArchive {
     }
 
     const trimmed = line.trim();
-    if (current && lastField && trimmed && !trimmed.startsWith("---") && !trimmed.startsWith(">")) {
+    if (!trimmed) {
+      lastField = null;
+      return;
+    }
+    if (current && lastField && !trimmed.startsWith("---") && !trimmed.startsWith(">")) {
       current.fields[lastField] = `${current.fields[lastField]}\n${trimmed}`;
     }
   });

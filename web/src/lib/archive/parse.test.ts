@@ -39,6 +39,14 @@ describe("parseArchive (file thực tế)", () => {
     expect(negotiation.every((p) => p.vi === null && p.sourceLang === "en")).toBe(true);
   });
 
+  it("không để dòng chân trang lọt vào nội dung câu", () => {
+    const leaked = archive.phrases.filter((p) =>
+      [p.vi, p.en, p.zh].some((v) => v?.includes("\n") || v?.includes("Last updated")),
+    );
+    expect(leaked).toEqual([]);
+    expect(archive.phrases.at(-1)?.zh).toBe("发货前请仔细检查质量，避免同样的问题再次发生。");
+  });
+
   it("mọi câu đều có EN và ZH", () => {
     expect(archive.phrases.filter((p) => !p.en || !p.zh)).toEqual([]);
   });
